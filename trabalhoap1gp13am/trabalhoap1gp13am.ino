@@ -1,10 +1,9 @@
-// Michel de Mleo Guimarães* - 202401569852 - TA
+// Michel de Melo Guimarães* - 202401569852 - TA
 // Pedro Macedo de Araujo 202401318728 - TA
 // Bernardo Lobo Marques - 202401709433 - TA
 // Gustavo Leonel Salvador - 202402875361 - TA
 // Bernardo Moreira Guimarães Gonçalves - 202401500283 - TA
 // João Victor Bathomarco Corrêa Carneiro - 202302902448 - TA
-
 
 #include <DHT.h>
 #include <Adafruit_Sensor.h>
