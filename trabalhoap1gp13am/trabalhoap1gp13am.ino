@@ -193,7 +193,7 @@ void inicioModoProgramacaoBinario() {
         ligarBuzzer();
     } 
     else if (estadoChave1 == HIGH && estadoChave2 == LOW && estadoChave3 == LOW && estadoChave4 == LOW) { // 1000
-        //desligarBuzzer();        
+        desligarBuzzer();        
     } 
     else if (estadoChave1 == HIGH && estadoChave2 == LOW && estadoChave3 == LOW && estadoChave4 == HIGH) { // 1001
         corLed(255, 0, 0); // RED
