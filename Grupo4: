@@ -1,0 +1,305 @@
+const int ledA = 9;
+const int ledB = 10;
+const int ledC = 11;
+
+const int buzzer = 8;
+
+const int rgbRed = 9;   
+const int rgbGreen = 10;  
+const int rgbBlue = 11;    
+
+const int tempSensor = A0;    
+const int trigPin = 5;       
+const int echoPin = 4;      
+const int pirSensor = A1;   
+
+const int chave1 = 37;      
+const int chave2 = 39;       
+const int chave3 = 41;        
+const int chave4 = 43;        
+
+const int botaoEnter = 2;
+
+const int chaveModo = 3;
+
+bool modoSerial = false;
+bool modoBinario = false;
+
+void setup() {
+
+  pinMode(ledA, OUTPUT);
+  pinMode(ledB, OUTPUT);
+  pinMode(ledC, OUTPUT);
+  pinMode(buzzer, OUTPUT);
+  pinMode(rgbRed, OUTPUT);
+  pinMode(rgbGreen, OUTPUT);
+  pinMode(rgbBlue, OUTPUT);
+
+  pinMode(tempSensor, INPUT);
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  pinMode(pirSensor, INPUT);
+
+  pinMode(chave1, INPUT_PULLUP);
+  pinMode(chave2, INPUT_PULLUP);
+  pinMode(chave3, INPUT_PULLUP);
+  pinMode(chave4, INPUT_PULLUP);
+  pinMode(botaoEnter, INPUT_PULLUP);
+
+  pinMode(chaveModo, INPUT_PULLUP);
+
+  Serial.begin(9600);
+
+  desligaTodosLeds();
+  desligarBuzzer();
+  definirCorRGB(0, 0, 0); 
+
+  Serial.println("Sistema Iniciado. Aguarde comandos...");
+}
+
+void loop() {
+
+  if (digitalRead(chaveModo) == LOW) {
+    if (!modoBinario) {
+      modoBinario = true;
+      modoSerial = false;
+      Serial.println("Modo de Programação Binário Ativado.");
+    }
+    if (digitalRead(botaoEnter) == LOW) {
+      delay(200); 
+      int comandoBinario = lerChavesBinarias();
+      processarComandoBinario(comandoBinario);
+      while (digitalRead(botaoEnter) == LOW); 
+    }
+  } else {
+    if (!modoSerial) {
+      modoSerial = true;
+      modoBinario = false;
+      Serial.println("Modo de Programação Serial Ativado.");
+    }
+    if (Serial.available() > 0) {
+      String comando = Serial.readStringUntil('\n');
+      processarComandoSerial(comando);
+    }
+  }
+}
+
+void processarComandoSerial(String comando) {
+  comando.trim(); 
+  comando.toUpperCase(); 
+
+  if (comando == "INICIO_PROG") {
+    Serial.println("Modo Serial Ativado");
+    modoBinario = false;
+    modoSerial = true;
+  } else if (comando == "FIM_PROG") {
+    Serial.println("Modo Serial Desativado");
+    modoSerial = false;
+  } else if (comando.startsWith("LED_ON")) {
+    char led = comando.charAt(7);
+    ligarLed(led);
+    Serial.print("LED ");
+    Serial.print(led);
+    Serial.println(" Ligado");
+  } else if (comando.startsWith("LED_OFF")) {
+    char led = comando.charAt(8);
+    desligarLed(led);
+    Serial.print("LED ");
+    Serial.print(led);
+    Serial.println(" Desligado");
+  } else if (comando == "BUZZ_ON") {
+    ligarBuzzer();
+    Serial.println("Buzzer Ligado");
+  } else if (comando == "BUZZ_OFF") {
+    desligarBuzzer();
+    Serial.println("Buzzer Desligado");
+  } else if (comando.startsWith("TEMP_READ")) {
+    lerTemperatura();
+  } else if (comando.startsWith("DIST_CHECK")) {
+    lerDistancia();
+  } else if (comando.startsWith("PRES_READ")) {
+    lerPresenca();
+  } else if (comando.startsWith("RGB_SET_COLOR")) {
+    if (comando.endsWith("RED")) {
+      definirCorRGB(255, 0, 0);
+      Serial.println("LED RGB Vermelho");
+    } else if (comando.endsWith("GREEN")) {
+      definirCorRGB(0, 255, 0); 
+      Serial.println("LED RGB Verde");
+    } else if (comando.endsWith("BLUE")) {
+      definirCorRGB(0, 0, 255); 
+      Serial.println("LED RGB Azul");
+    } else {
+      Serial.println("Cor inválida para o LED RGB.");
+    }
+  } else {
+    Serial.println("Comando inválido.");
+  }
+}
+
+void processarComandoBinario(int valorBinario) {
+  switch (valorBinario) {
+    case 0b0000:
+      ligarLed('A');
+      Serial.println("LED A Ligado");
+      break;
+    case 0b0001:
+      desligarLed('A');
+      Serial.println("LED A Desligado");
+      break;
+    case 0b0010:
+      ligarLed('B');
+      Serial.println("LED B Ligado");
+      break;
+    case 0b0011:
+      desligarLed('B');
+      Serial.println("LED B Desligado");
+      break;
+    case 0b0100:
+      ligarBuzzer();
+      Serial.println("Buzzer Ligado");
+      break;
+    case 0b0101:
+      desligarBuzzer();
+      Serial.println("Buzzer Desligado");
+      break;
+    case 0b0110:
+      lerTemperatura();
+      break;
+    case 0b0111:
+      lerDistancia();
+      break;
+    case 0b1000:
+      lerPresenca();
+      break;
+    case 0b1001:
+      definirCorRGB(255, 0, 0);
+      Serial.println("LED RGB Vermelho");
+      break;
+    case 0b1010:
+      definirCorRGB(0, 255, 0); 
+      Serial.println("LED RGB Verde");
+      break;
+    case 0b1011:
+      definirCorRGB(0, 0, 255);
+      Serial.println("LED RGB Azul");
+      break;
+    case 0b1100:
+      Serial.println("Comando INICIO_PROG não aplicável no modo binário");
+      break;
+    case 0b1101:
+      modoBinario = false;
+      Serial.println("Modo Binário Desativado");
+      break;
+    case 0b1110:
+      ligarLed('C');
+      Serial.println("LED C Ligado");
+      break;
+    case 0b1111:
+      desligarLed('C');
+      Serial.println("LED C Desligado");
+      break;
+    default:
+      Serial.println("Comando binário inválido.");
+      break;
+  }
+}
+
+int lerChavesBinarias() {
+  int valor = 0;
+  valor |= (!digitalRead(chave4)) << 3; 
+  valor |= (!digitalRead(chave3)) << 2;
+  valor |= (!digitalRead(chave2)) << 1;
+  valor |= (!digitalRead(chave1)) << 0; 
+  return valor;
+}
+
+void ligarLed(char led) {
+  switch (led) {
+    case 'A':
+      digitalWrite(ledA, HIGH);
+      break;
+    case 'B':
+      digitalWrite(ledB, HIGH);
+      break;
+    case 'C':
+      digitalWrite(ledC, HIGH);
+      break;
+    default:
+      Serial.println("LED inválido.");
+      break;
+  }
+}
+
+void desligarLed(char led) {
+  switch (led) {
+    case 'A':
+      digitalWrite(ledA, LOW);
+      break;
+    case 'B':
+      digitalWrite(ledB, LOW);
+      break;
+    case 'C':
+      digitalWrite(ledC, LOW);
+      break;
+    default:
+      Serial.println("LED inválido.");
+      break;
+  }
+}
+
+void desligaTodosLeds() {
+  digitalWrite(ledA, LOW);
+  digitalWrite(ledB, LOW);
+  digitalWrite(ledC, LOW);
+}
+
+void ligarBuzzer() {
+  tone(buzzer, 200);
+}
+
+void desligarBuzzer() {
+  noTone(buzzer);
+}
+
+void definirCorRGB(int r, int g, int b) {
+  analogWrite(rgbRed, r);
+  analogWrite(rgbGreen, g);
+  analogWrite(rgbBlue, b);
+}
+
+void lerTemperatura() {
+  int valor = analogRead(tempSensor);
+  float temperatura = (valor * 5.0 / 1023.0) * 100;
+  Serial.print("Temperatura: ");
+  Serial.print(temperatura);
+  Serial.println(" °C");
+}
+
+void lerDistancia() {
+  long duracao;
+  int distancia;
+
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  duracao = pulseIn(echoPin, HIGH);
+
+  distancia = duracao * 0.034 / 2;
+
+  Serial.print("Distância: ");
+  Serial.print(distancia);
+  Serial.println(" cm");
+}
+
+void lerPresenca() {
+  int estado = digitalRead(pirSensor);
+  if (estado == HIGH) {
+    Serial.println("Presença detectada!");
+  } else {
+    Serial.println("Nenhuma presença detectada.");
+  }
+}
