@@ -1,0 +1,229 @@
+// Matheus Carvalho - 202308675427 - TA
+// Guilherme Carvalho-202308675435 - TA
+// Guilherme de Moraes Lopes Silva - 202401632473 - TA
+// Felipe Dutrain de Sales -202402011359 - TA
+// Leonardo Almeida Vaz - 202402626604 - TA
+
+
+
+#define VEL_SOM 340
+#define CHAVE1 12
+
+// Declaração dos pinos
+const int pinEcho = 6;         // Pino Echo do sensor ultrassônico
+const int pinTrig = 7;         // Pino Trig do sensor ultrassônico
+const int pinLedA = 9;         // LED A
+const int pinLedB = 10;        // LED B
+const int pinLedC = 11;        // LED C
+const int pinBuzzer = 8;       // Buzzer
+const int pinChaveEnter = 13;  // Chave "Enter"
+const int pinLuminosidade = A0; // Sensor de luminosidade
+
+// Protótipos das funções
+void ligarLed(char led);
+void desligarLed(char led);
+void ligarBuzzer();
+void desligarBuzzer();
+void lerDistancia();
+void lerLuminosidade();
+void definirCorRGB(int r, int g, int b);
+void processarComando(String comando);
+void processarComandoBinario(int comando);
+void iniciarModoProgramacaoBinario();
+int lerChavesBinarias();
+
+void setup() {
+    pinMode(CHAVE1, INPUT);
+    pinMode(pinChaveEnter, INPUT);
+    pinMode(pinEcho, INPUT);
+    pinMode(pinTrig, OUTPUT);
+    pinMode(pinLedA, OUTPUT);
+    pinMode(pinLedB, OUTPUT);
+    pinMode(pinLedC, OUTPUT);
+    pinMode(pinBuzzer, OUTPUT);
+    
+    Serial.begin(9600);
+    digitalWrite(pinTrig, LOW);
+}
+
+void loop() {
+    if (Serial.available()) {
+        String comando = Serial.readStringUntil('\n');
+        processarComando(comando);
+    }
+
+    
+    if (digitalRead(CHAVE1) == HIGH) {
+        iniciarModoProgramacaoBinario();
+    }
+}
+
+void processarComando(String comando) {
+    if (comando == "LED_ON A") {
+        ligarLed('A');
+    } else if (comando == "LED_OFF A") {
+        desligarLed('A');
+    } else if (comando == "LED_ON B") {
+        ligarLed('B');
+    } else if (comando == "LED_OFF B") {
+        desligarLed('B');
+    } else if (comando == "BUZZ_ON") {
+        ligarBuzzer();
+    } else if (comando == "BUZZ_OFF") {
+        desligarBuzzer();
+    } else if (comando == "LIGHT_CHECK A") {
+        lerLuminosidade();
+    } else if (comando == "DIST_CHECK A") {
+        lerDistancia();
+    } else if (comando == "RGB_SET_COLOR A RED") {
+        definirCorRGB(255, 0, 0);
+    } else if (comando == "RGB_SET_COLOR A GREEN") {
+        definirCorRGB(0, 255, 0);
+    } else if (comando == "RGB_SET_COLOR A BLUE") {
+        definirCorRGB(0, 0, 255);
+    } else if (comando == "RGB_SET_COLOR OFF") {
+        definirCorRGB(0, 0, 0);
+    } else if (comando == "LED_ON C") {
+        ligarLed('C');
+    } else if (comando == "LED_OFF C") {
+        desligarLed('C');
+    } else if (comando == "INICIO_PROG") {
+        Serial.println("Modo de programação iniciado.");
+    } else if (comando == "FIM_PROG") {
+        Serial.println("Modo de programação encerrado.");
+    } else {
+        Serial.println("Comando inválido.");
+    }
+}
+
+void iniciarModoProgramacaoBinario() {
+    Serial.println("Modo de programação binário iniciado.");
+    while (digitalRead(CHAVE1) == HIGH) {
+        int comandoBinario = lerChavesBinarias();
+        if (digitalRead(pinChaveEnter) == HIGH) {
+            processarComandoBinario(comandoBinario);
+            delay(1000); // Delay para evitar múltiplos acionamentos
+        }
+    }
+    Serial.println("Modo de programação binário encerrado.");
+}
+
+int lerChavesBinarias() {
+    int estadoChaves[4];
+    estadoChaves[0] = digitalRead(2); 
+    estadoChaves[1] = digitalRead(3); 
+    estadoChaves[2] = digitalRead(4); 
+    estadoChaves[3] = digitalRead(5); 
+
+    // Combina os estados das chaves em um comando binário
+    return (estadoChaves[0] << 3) | (estadoChaves[1] << 2) | (estadoChaves[2] << 1) | estadoChaves[3];
+}
+
+void processarComandoBinario(int comando) {
+    switch (comando) {
+        case 0b0000: 
+            ligarLed('A');
+            break;
+        case 0b0001: 
+            desligarLed('A');
+            break;
+        case 0b0010: 
+            ligarLed('B');
+            break;
+        case 0b0011: 
+            desligarLed('B');
+            break;
+        case 0b0100: 
+            ligarBuzzer();
+            break;
+        case 0b0101: 
+            desligarBuzzer();
+            break;
+        case 0b0110: 
+            lerDistancia();
+            break;
+        case 0b1000: 
+            lerLuminosidade();
+            break;
+        case 0b1001: 
+            definirCorRGB(255, 0, 0); // Vermelho
+            break;
+        case 0b1010: 
+            definirCorRGB(0, 255, 0); // Verde
+            break;
+        case 0b1011:
+            definirCorRGB(0, 0, 255); // Azul
+            break;
+        case 0b1100: 
+            Serial.println("Modo de programação iniciado.");
+            break;
+        case 0b1101: 
+            Serial.println("Modo de programação encerrado.");
+            break;
+        case 0b1110: 
+            ligarLed('C');
+            break;
+        case 0b1111: 
+            desligarLed('C');
+            break;
+        default:
+            Serial.println("Comando binário inválido.");
+            break;
+    }
+}
+
+void ligarLed(char led) {
+    if (led == 'A') {
+        digitalWrite(pinLedA, HIGH); 
+    } else if (led == 'B') {
+        digitalWrite(pinLedB, HIGH); 
+    } else if (led == 'C') {
+        digitalWrite(pinLedC, HIGH); 
+    }
+}
+
+void desligarLed(char led) {
+    if (led == 'A') {
+        digitalWrite(pinLedA, LOW); 
+    } else if (led == 'B') {
+        digitalWrite(pinLedB, LOW);
+    } else if (led == 'C') {
+        digitalWrite(pinLedC, LOW); 
+    }
+}
+
+void ligarBuzzer() {
+    digitalWrite(pinBuzzer, HIGH);
+}
+
+void desligarBuzzer() {
+    digitalWrite(pinBuzzer, LOW);
+}
+
+void lerDistancia() {
+    Serial.println("Lendo distância...");
+    digitalWrite(pinTrig, LOW);
+    delayMicroseconds(2);
+    digitalWrite(pinTrig, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(pinTrig, LOW);
+
+    long duracao = pulseIn(pinEcho, HIGH);
+
+    float distancia = duracao * 0.034 / 2; // Velocidade do som: 0.034 cm/microsegundo
+
+    Serial.print("Distância: ");
+    Serial.print(distancia);
+    Serial.println(" cm");
+}
+
+    int luminosidade = analogRead(pinLuminosidade);
+    Serial.print("Luminosidade: ");
+    Serial.println(luminosidade);
+}
+
+void definirCorRGB(int r, int g, int b) {
+    analogWrite(pinLedA, r); // Vermelho
+    analogWrite(pinLedB, g); // Verde
+    analogWrite(pinLedC, b); // Azul
+}
