@@ -1,5 +1,3 @@
-// C++ code
-// LM35
 // Diego Gode Bonani 202401000711 - TA
 // Tiago Oliveira Macedo 202401583537 - TA
 // Caio Cavalcanti Salomão de Souza 202401285731 - TA
