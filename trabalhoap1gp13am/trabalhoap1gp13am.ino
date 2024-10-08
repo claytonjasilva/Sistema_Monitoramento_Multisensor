@@ -5,6 +5,24 @@
 // Bernardo Moreira Guimarães Gonçalves - 202401500283 - TA
 // João Victor Bathomarco Corrêa Carneiro - 202302902448 - TA
 
+// Códigos Binarios
+// 0000 - Inicio Prog
+// 0001 - ligarLed(A)
+// 0010 - ligarLed(B)
+// 0011 - ligarLed(C)        
+// 0100 - desligarLed(A)        
+// 0101 - desligarLed(B)     
+// 0110 - desligarLed(C)
+// 0111 - ligar buzzer
+// 1000 - Desligar buzzer
+// 1001 - RGB red 
+// 1010 - RGB Green      
+// 1011 - RGB blue 
+// 1100 - Distancia        
+// 1101 - Luz      
+// 1110 - Temperatura      
+// 1111 - Fim Prog
+
 #include <DHT.h>
 #include <Adafruit_Sensor.h>
 
