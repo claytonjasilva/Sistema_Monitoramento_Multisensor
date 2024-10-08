@@ -73,7 +73,7 @@ void loop() {
                 
             }
         }
-    } else {
+    } else if(digitalRead(39) == HIGH && controleModo == HIGH) {
         contador = 0;
         inicioModoProgramacaoBinario();
     } 
