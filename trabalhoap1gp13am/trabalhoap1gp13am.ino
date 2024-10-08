@@ -147,8 +147,11 @@ void inicioModoProgramacaoSerial() {
         }
         else if (comando == "LDR_READ A") {
             int lightLevel = analogRead(LDR_PIN);
-            Serial.print("Nível de luz (raw): ");
-            Serial.println(lightLevel);
+            if (lightLevel <= 800){
+              Serial.println("Luz detectada");
+            } else {
+              Serial.println("Luz não detectada");
+            }
             delay(500);
   
         }
@@ -220,9 +223,12 @@ void inicioModoProgramacaoBinario() {
     }
     else if (estadoChave1 == HIGH && estadoChave2 == HIGH && estadoChave3 == LOW && estadoChave4 == HIGH) { // 1101 
       int lightLevel = analogRead(LDR_PIN);
-        Serial.print("Nível de luz: ");
-        Serial.println(lightLevel);
-        delay(1000);
+        if (lightLevel <= 800){
+          Serial.println("Luz detectada");
+        } else {
+          Serial.println("Luz não detectada");
+        }
+        delay(500);
     }
   else if (estadoChave1 == HIGH && estadoChave2 == HIGH && estadoChave3 == HIGH && estadoChave4 == LOW) { // 1110 
       float h = dht.readHumidity();
