@@ -1,8 +1,8 @@
 // Enzo Guedes Cardoso - 202401000019 - TA
-//
-//
-//
-//
+// Luca Confente - 202401553867 - TA
+// Jeronimo Chiclana - 202401590118 - TA
+// Julia Siodaro - 202401000434 - TA
+// 
 
 #define VEL_SOM 340
 const int LED_Y = 9;
